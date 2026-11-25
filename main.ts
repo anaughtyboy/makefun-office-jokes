@@ -25,6 +25,9 @@ if (JOKE.includes("\n") || JOKE.includes("\r")) {
 if (JOKE !== JOKE.trim()) {
   fail("joke must not have leading or trailing whitespace");
 }
+if (/[\u0000-\u001f\u007f]/.test(JOKE)) {
+  fail("joke must not contain control characters");
+}
 
 const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outputDir, { recursive: true });
@@ -34,6 +37,9 @@ writeFileSync(entryPath, JOKE, "utf8");
 const roundTrip = readFileSync(entryPath, "utf8");
 if (roundTrip !== JOKE) {
   fail("written file does not match the joke byte for byte");
+}
+if (Buffer.byteLength(roundTrip, "utf8") !== Buffer.byteLength(JOKE, "utf8")) {
+  fail("written file's byte length does not match the joke");
 }
 
 console.log(`wrote ${JOKE.length} characters to ${entryPath}`);
